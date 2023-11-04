@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.widget.Toast
 import com.example.timetracker.databinding.ActivityMainBinding
 import androidx.activity.viewModels
+import com.example.timetracker.db.TimeTrackerDatabase
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -15,7 +16,9 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel by viewModels<MainViewModel>()
+    private val viewModel by viewModels<MainViewModel>{
+        MainViewModelFactory(TimeTrackerDatabase.getDatabase(this))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +36,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun initSubmitButton() {
         binding.btnSubmit.setOnClickListener {
-            //save to DB
+           viewModel.insertCheckInDateTime()
+        }
+        viewModel.insertSuccess.observe(this) {success ->
+            if (success) Toast.makeText(this, "Check in date and time saved successfully!", Toast.LENGTH_LONG).show()
+            if (!success) Toast.makeText(this, "Couldn't save date and time!", Toast.LENGTH_LONG).show()
         }
     }
 
