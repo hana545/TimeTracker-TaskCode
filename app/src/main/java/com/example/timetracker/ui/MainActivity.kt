@@ -27,6 +27,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         initDateTimePicker()
+
+        initSubmitButton()
+    }
+
+    private fun initSubmitButton() {
+        binding.btnSubmit.setOnClickListener {
+            //save to DB
+        }
     }
 
     private fun initDateTimePicker() {
