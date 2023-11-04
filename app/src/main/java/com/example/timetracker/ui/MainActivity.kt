@@ -5,40 +5,34 @@ import android.app.TimePickerDialog
 import android.icu.util.Calendar
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import com.example.timetracker.databinding.ActivityMainBinding
+import androidx.activity.viewModels
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        viewModel.dateTime.observe(this) { dateTime ->
+            binding.datetimeData.text = dateTime
+        }
+
         initDateTimePicker()
     }
 
     private fun initDateTimePicker() {
-        val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-        val hour = 6
-        val minute = 30
-
-        binding.datetimeData.apply {
-            text = setDateTime(year, month, day, hour, minute)
-            setOnClickListener {
-            showDateTimePickerDialog(year, month, day, hour, minute)
+        binding.datetimeData.setOnClickListener {
+            showDateTimePickerDialog()
             }
-        }
-    }
-
-    private fun setDateTime(year: Int, month: Int, day: Int, hour: Int, minute: Int) : String{
-        return String.format("%02d/%02d/%d  %02d:%02d", day, month + 1, year, hour, minute)
     }
 
     private fun isToday(year: Int, month: Int, day: Int) : Boolean{
@@ -50,7 +44,14 @@ class MainActivity : AppCompatActivity() {
         return year == currentYear && month == currentMonth && day == currentDay
     }
 
-    private fun showDateTimePickerDialog(year: Int, month: Int, day: Int, hour: Int, minute: Int) {
+    private fun showDateTimePickerDialog() {
+        val calendar = viewModel.dateTime.value?.let { parseDateTime(it) }
+        val year = calendar!!.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+
         val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
             if (isValidDate(selectedYear, selectedMonth, selectedDay)) {
                 showTimePickerDialog(selectedYear, selectedMonth, selectedDay, hour, minute)
@@ -67,7 +68,7 @@ class MainActivity : AppCompatActivity() {
             if (isToday(year, month, day) && !isValidTime(selectedHour, selectedMinute)) {
                 Toast.makeText(this, "Please select a time in the past or the present.", Toast.LENGTH_SHORT).show()
             } else {
-                binding.datetimeData.text = setDateTime(year, month, day, selectedHour, selectedMinute)
+                viewModel.updateDateTime(year, month, day, selectedHour, selectedMinute)
             }
         }, hour, minute, true)
 
@@ -92,5 +93,20 @@ class MainActivity : AppCompatActivity() {
         val selectedTime = hour*100 + minute
         val currentTime = calendar.get(Calendar.HOUR_OF_DAY)*100 + calendar.get(Calendar.MINUTE)
         return selectedTime <= currentTime
+    }
+
+    fun parseDateTime(dateTimeString: String): Calendar? {
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        try {
+            val date = dateFormat.parse(dateTimeString)
+            val calendar = Calendar.getInstance()
+            if (date != null) {
+                calendar.time = date
+                return calendar
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 }
