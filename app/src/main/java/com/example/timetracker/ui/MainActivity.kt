@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun parseDateTime(dateTimeString: String): Calendar? {
-        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         try {
             val date = dateFormat.parse(dateTimeString)
             val calendar = Calendar.getInstance()

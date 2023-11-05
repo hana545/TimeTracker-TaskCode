@@ -46,7 +46,7 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
     }
 
     private fun setDateTime(year: Int, month: Int, day: Int, hour: Int, minute: Int): String {
-        return String.format("%02d/%02d/%d  %02d:%02d", day, month + 1, year, hour, minute)
+        return String.format("%d-%02d-%02d  %02d:%02d", year, month + 1, day, hour, minute)
     }
 
     fun updateDateTime(year: Int, month: Int, day: Int, hour: Int, minute: Int) {
