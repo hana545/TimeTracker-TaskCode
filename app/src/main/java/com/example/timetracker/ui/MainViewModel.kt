@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.timetracker.db.EmployeeEntity
 import com.example.timetracker.db.TimeTrackerDatabase
+import com.example.timetracker.mockAPI.ApiModule
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
@@ -34,14 +35,7 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
             _dateTime.value = recentDateTime.checkInDate
         } else {
             //fetch with API
-            val calendar = Calendar.getInstance()
-            val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
-            val day = calendar.get(Calendar.DAY_OF_MONTH)
-            val hour = 6
-            val minute = 30
-
-            _dateTime.value = setDateTime(year, month, day, hour, minute)
+            getDateTimewithAPI()
         }
     }
 
@@ -64,4 +58,16 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
             }
         }
     }
+
+    fun getDateTimewithAPI() =
+        viewModelScope.launch {
+            try {
+                val response = ApiModule.getDate()
+                _dateTime.value = response.datetime
+            } catch (ups: Exception) {
+                Log.e("DATETIMEAPI", "ups "+ups.toString())
+            }
+        }
+
+
 }
