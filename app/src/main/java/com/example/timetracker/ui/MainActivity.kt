@@ -5,6 +5,7 @@ import android.app.TimePickerDialog
 import android.icu.util.Calendar
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import com.example.timetracker.databinding.ActivityMainBinding
 import androidx.activity.viewModels
@@ -28,6 +29,13 @@ class MainActivity : AppCompatActivity() {
         viewModel.dateTime.observe(this) { dateTime ->
             binding.datetimeData.text = dateTime
         }
+        viewModel.progress.observe(this) { progress ->
+            binding.apply {
+                progressBar.visibility = if (progress) View.VISIBLE else View.INVISIBLE
+                btnDatetimePicker.isEnabled = !progress
+                btnSubmit.isEnabled = !progress
+            }
+        }
 
         initDateTimePicker()
 
@@ -45,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initDateTimePicker() {
-        binding.datetimeData.setOnClickListener {
+        binding.btnDatetimePicker.setOnClickListener {
             showDateTimePickerDialog()
             }
     }

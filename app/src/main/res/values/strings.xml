@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Time Tracker</string>
+    <string name="btn_datetime_picker">Pick date and time</string>
 </resources>

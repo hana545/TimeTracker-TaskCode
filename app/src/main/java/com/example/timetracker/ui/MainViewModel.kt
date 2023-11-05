@@ -19,11 +19,16 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
     private val _insertSuccess = MutableLiveData<Boolean>()
     val insertSuccess: LiveData<Boolean> get() = _insertSuccess
 
+
+    private val _progress = MutableLiveData<Boolean>()
+    val progress: LiveData<Boolean> get() = _progress
+
     init {
         initDateTime()
     }
 
     private fun initDateTime() {
+        _progress.value = true
         viewModelScope.launch {
             fetchRecentDateTime()
         }
@@ -33,6 +38,7 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
         val recentDateTime = database.employeeDao().getRecentCheckIn()
         if (recentDateTime != null && recentDateTime.checkInDate.isNotEmpty()) {
             _dateTime.value = recentDateTime.checkInDate
+            _progress.value = false
         } else {
             //fetch with API
             getDateTimewithAPI()
@@ -48,13 +54,16 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
     }
 
     fun insertCheckInDateTime() {
+        _progress.value = true
         viewModelScope.launch {
             try {
                 dateTime.value?.let { EmployeeEntity(it) }?.let { database.employeeDao().insert(it) }
                 _insertSuccess.value = true
+                _progress.value = false
             } catch (ups: Exception) {
                 Log.e("INSERTDATABASE", "ups: " + ups.toString())
                 _insertSuccess.value = false
+                _progress.value = false
             }
         }
     }
@@ -64,6 +73,7 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
             try {
                 val response = ApiModule.getDate()
                 _dateTime.value = response.datetime
+                _progress.value = false
             } catch (ups: Exception) {
                 Log.e("DATETIMEAPI", "ups "+ups.toString())
             }

@@ -9,13 +9,27 @@
     android:gravity="center"
     tools:context=".ui.MainActivity">
 
-    <Button
+    <TextView
         android:id="@+id/datetimeData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="Pick date and time"
+        style="@style/TextAppearance.AppCompat.Title"/>
+
+    <Button
+        android:id="@+id/btnDatetimePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/btn_datetime_picker"
         style="@style/Widget.Material3.Button.ElevatedButton"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:visibility="invisible"/>
 
     <Button
         android:id="@+id/btnSubmit"
