@@ -35,6 +35,7 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
     }
 
     private suspend fun fetchRecentDateTime() {
+        //fetch from DB
         val recentDateTime = database.employeeDao().getRecentCheckIn()
         if (recentDateTime != null && recentDateTime.checkInDate.isNotEmpty()) {
             _dateTime.value = recentDateTime.checkInDate
@@ -68,16 +69,15 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
         }
     }
 
-    fun getDateTimewithAPI() =
-        viewModelScope.launch {
-            try {
-                val response = ApiModule.getDate()
-                _dateTime.value = response.datetime
-                _progress.value = false
-            } catch (ups: Exception) {
-                Log.e("DATETIMEAPI", "ups "+ups.toString())
-            }
+    private suspend fun getDateTimewithAPI() {
+        try {
+            val response = ApiModule.getDate()
+            _dateTime.value = response.datetime
+            _progress.value = false
+        } catch (ups: Exception) {
+            Log.e("DATETIMEAPI", "ups "+ups.toString())
         }
+    }
 
 
 }
