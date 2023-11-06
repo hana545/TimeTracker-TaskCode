@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.timetracker.db.EmployeeEntity
 import com.example.timetracker.db.TimeTrackerDatabase
+import com.example.timetracker.mockAPI.ApiModule
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
@@ -18,30 +19,30 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
     private val _insertSuccess = MutableLiveData<Boolean>()
     val insertSuccess: LiveData<Boolean> get() = _insertSuccess
 
+
+    private val _progress = MutableLiveData<Boolean>()
+    val progress: LiveData<Boolean> get() = _progress
+
     init {
         initDateTime()
     }
 
     private fun initDateTime() {
+        _progress.value = true
         viewModelScope.launch {
             fetchRecentDateTime()
         }
     }
 
     private suspend fun fetchRecentDateTime() {
+        //fetch from DB
         val recentDateTime = database.employeeDao().getRecentCheckIn()
         if (recentDateTime != null && recentDateTime.checkInDate.isNotEmpty()) {
             _dateTime.value = recentDateTime.checkInDate
+            _progress.value = false
         } else {
             //fetch with API
-            val calendar = Calendar.getInstance()
-            val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
-            val day = calendar.get(Calendar.DAY_OF_MONTH)
-            val hour = 6
-            val minute = 30
-
-            _dateTime.value = setDateTime(year, month, day, hour, minute)
+            getDateTimewithAPI()
         }
     }
 
@@ -54,14 +55,29 @@ class MainViewModel(private val database: TimeTrackerDatabase)  : ViewModel() {
     }
 
     fun insertCheckInDateTime() {
+        _progress.value = true
         viewModelScope.launch {
             try {
                 dateTime.value?.let { EmployeeEntity(it) }?.let { database.employeeDao().insert(it) }
                 _insertSuccess.value = true
+                _progress.value = false
             } catch (ups: Exception) {
                 Log.e("INSERTDATABASE", "ups: " + ups.toString())
                 _insertSuccess.value = false
+                _progress.value = false
             }
         }
     }
+
+    private suspend fun getDateTimewithAPI() {
+        try {
+            val response = ApiModule.getDate()
+            _dateTime.value = response.datetime
+            _progress.value = false
+        } catch (ups: Exception) {
+            Log.e("DATETIMEAPI", "ups "+ups.toString())
+        }
+    }
+
+
 }
